@@ -1,0 +1,2 @@
+main.py lines 30 conn = psycopg2.connect(host='localhost', database='fastapi', user='postgres', password='postgres041$', cursor_factory=RealDictCursor)
+database.py lines 8 SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:postgres041$@localhost/fastapi'
