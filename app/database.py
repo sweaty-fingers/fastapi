@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 # SQLALCHEMY_DATABASE_URL = 'postgresql://<username>:<password>@<ip-address/hostname>/<database_name>'
 # URL을 hard coding 하는 것은 좋지 않음 (추후 수정)
-
+SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:postgres041$@localhost/fastapi'
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
