@@ -29,6 +29,9 @@
 		},
 		{
 			"path": "../../Miniter"
+		},
+		{
+			"path": "../../source"
 		}
 	],
 	"settings": {}

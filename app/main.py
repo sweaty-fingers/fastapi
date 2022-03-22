@@ -1,16 +1,15 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-
+from passlib.context import CryptContext
 from fastapi import FastAPI, Response, status, HTTPException, Depends # Depends?
 from fastapi.params import Body
-from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from random import randrange
 import time
 
 #from sqlalchemy.orm import Session
 from sqlalchemy.orm import Session
-from . import models
+from . import models, schemas
 from .database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
@@ -18,11 +17,6 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 #request Get method url: "/"
-
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
 
 # 데이터베이스 연결
 while True:
@@ -53,24 +47,16 @@ def root():
     return {"message": "welcome to my root"}
 
 
-@app.get("/sqlalchemy")
-def test_posts(db: Session = Depends(get_db)):
-    
-    posts = db.query(models.Post).all() # all()을 붙이지 않으면 그냥 sql 구문이 된다.
-
-    return {"data": posts}
-
-
-@app.get("/posts")
+@app.get("/posts", response_model=List[schemas.Post]) # 스키마의 리스트가 반환되어야 하므로 리스트 형이 아니라면 에러가 발생한다.
 def get_posts(db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM posts""") 
     # posts = cursor.fetchall()
     posts = db.query(models.Post).all()
-    return {"data": posts}
+    return posts
 
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_posts(post: Post, db: Session = Depends(get_db)):
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
+def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # f-string을 사용하게 되면 SQL명령어 등이 인자로 들어갈 때 구문이 실행되는 등 문제가 발생할 수 있다.
     # 따라서 SQL을 다룰 때에는 %s와 같은 형식을 사용한다.
     # cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """, (post.title, post.content, post.published))
@@ -81,7 +67,7 @@ def create_posts(post: Post, db: Session = Depends(get_db)):
     db.add(new_post)
     db.commit()
     db.refresh(new_post) # default 값 등을 넣어주기 위해 db에서 데이터를 가져와 인스턴스에 다시 넣어주는 작업
-    return {"data": new_post}
+    return new_post
 # title str, content str, category, Bool publish
 
 # @app.get("/posts/latest") # "/posts/{id}" 뒤에 정의할 경우 앞서 정의한 {id}와 매치되어 에러가 뜰 수 있다.
@@ -105,7 +91,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
         
         # response.status_code = status.HTTP_404_NOT_FOUND # status code를 404로 바꿈
         # return {'message': f"post with id: {id} was not found"}
-    return {"post_detail": post}
+    return post
 
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -129,8 +115,8 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT) 
  
 
-@app.put("/posts/{id}")
-def update_post(id: int, updated_post: Post, db: Session = Depends(get_db)):
+@app.put("/posts/{id}", response_model=schemas.Post)
+def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
     
     # cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""", (post.title, post.content, post.published, str(id)))
     
@@ -147,4 +133,15 @@ def update_post(id: int, updated_post: Post, db: Session = Depends(get_db)):
     post_query.update(updated_post.dict(), synchronize_session=False)
     db.commit()
 
-    return {"data": post_query.first()}
+    return post_query.first()
+
+
+@app.post("/createuser", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    new_user = models.User(**user.dict())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user) # default 값 등을 넣어주기 위해 db에서 데이터를 가져와 인스턴스에 다시 넣어주는 작업
+    return new_user
+
+
