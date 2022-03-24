@@ -1,37 +1,7 @@
 {
 	"folders": [
 		{
-			"path": "../../nlp"
-		},
-		{
-			"path": "../../fsdl"
-		},
-		{
-			"path": "../../coding_test"
-		},
-		{
-			"path": "../../eff_python/eff_python_source"
-		},
-		{
-			"path": "../../tensorflow"
-		},
-		{
-			"path": "../../cnn"
-		},
-		{
-			"path": "../../deZero"
-		},
-		{
-			"path": "../../ml-powered-application"
-		},
-		{
 			"path": ".."
-		},
-		{
-			"path": "../../Miniter"
-		},
-		{
-			"path": "../../source"
 		}
 	],
 	"settings": {}
