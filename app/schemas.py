@@ -16,6 +16,7 @@ class PostCreate(PostBase):
 class Post(PostBase):
     id: int
     created_at: datetime
+    owner_id: int
     
     # pydantic 모델은 기본적으로 딕셔너리 타입의 정보가 들어올 것이라고 생각한다.
     # 따라서 ORM 타입 데이터가 들어갈 것이라고 명시해주어야 정상적으로 변환시켜줄 수 있다.

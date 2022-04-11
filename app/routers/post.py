@@ -13,7 +13,8 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schemas.Post]) # 스키마의 리스트가 반환되어야 하므로 리스트 형이 아니라면 에러가 발생한다.
-def get_posts(db: Session = Depends(get_db), user_id: int = Depends(get_current_user)):
+def get_posts(db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    # current_user의 타입은 int가 아니지만 앱 실행에 문제가 없다. 이를 Dict로 바꿔주어도 된다.
     # cursor.execute("""SELECT * FROM posts""") 
     # posts = cursor.fetchall()
     posts = db.query(models.Post).all()
@@ -29,7 +30,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), curren
     # conn.commit()
     
     print(current_user.email)
-    new_post = models.Post(**post.dict())
+    new_post = models.Post(owner_id=current_user.id, **post.dict())
     db.add(new_post)
     db.commit()
     db.refresh(new_post) # default 값 등을 넣어주기 위해 db에서 데이터를 가져와 인스턴스에 다시 넣어주는 작업
@@ -54,7 +55,8 @@ def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail=f"post with id: {id} was not found")
-        
+    
+
         # response.status_code = status.HTTP_404_NOT_FOUND # status code를 404로 바꿈
         # return {'message': f"post with id: {id} was not found"}
     return post
@@ -70,12 +72,16 @@ def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depe
     # deleted_post = cursor.fetchone()
     # conn.commit()
 
-    post = db.query(models.Post).filter(models.Post.id == id)
+    post_query = db.query(models.Post).filter(models.Post.id == id)
+    post = post_query.first()
 
-    if post.first() == None:
+    if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id {id} does not exist")
 
-    post.delete(synchronize_session=False)
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
+
+    post_query.delete(synchronize_session=False)
     db.commit()
     # return {"message": "post was succesfully deleted"} # status_code로 204를 전달해준다면 아무것도 없다는 의미이므로 message를 return으로 보낼 경우 에러가 발생할 수 있다.
     return Response(status_code=status.HTTP_204_NO_CONTENT) 
@@ -96,6 +102,10 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
     if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id {id} does not exist")
     
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Not authorized to perform requested action")
+
     post_query.update(updated_post.dict(), synchronize_session=False)
     db.commit()
 
