@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from app import models, schemas
 from app.database import get_db
@@ -13,11 +13,17 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schemas.Post]) # 스키마의 리스트가 반환되어야 하므로 리스트 형이 아니라면 에러가 발생한다.
-def get_posts(db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+def get_posts(db: Session = Depends(get_db), current_user: int = Depends(get_current_user),
+limit: int = 10, skip: int = 0, search: Optional[str] = ""):
     # current_user의 타입은 int가 아니지만 앱 실행에 문제가 없다. 이를 Dict로 바꿔주어도 된다.
     # cursor.execute("""SELECT * FROM posts""") 
     # posts = cursor.fetchall()
-    posts = db.query(models.Post).all()
+    print(search)
+    # posts = db.query(models.Post).all()
+    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    # 로그인 한 유저의 포스트만 보게 하는 법
+    # posts = db.query(models.Post).filter(
+    #     models.Post.owner_id == current_user.id).all()
     return posts
 
 
@@ -32,7 +38,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), curren
     print(current_user.email)
     new_post = models.Post(owner_id=current_user.id, **post.dict())
     db.add(new_post)
-    db.commit()
+    db.commit() 
     db.refresh(new_post) # default 값 등을 넣어주기 위해 db에서 데이터를 가져와 인스턴스에 다시 넣어주는 작업
     return new_post
 # title str, content str, category, Bool publish
@@ -43,7 +49,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), curren
 #     return {"detail": post}
 
 
-@router.get("/{id}")
+@router.get("/{id}", response_model=schemas.Post)
 def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     # cursor.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),))
     # post = cursor.fetchone()

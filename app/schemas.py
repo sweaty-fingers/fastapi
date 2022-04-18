@@ -12,12 +12,22 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
     pass
     
+# 아이디를 만든 후 사용자에게 password와 같은 값을 보여주지 않기 위한 respose_model
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
 
 class Post(PostBase):
     id: int
     created_at: datetime
     owner_id: int
-    
+    owner: UserOut
+
     # pydantic 모델은 기본적으로 딕셔너리 타입의 정보가 들어올 것이라고 생각한다.
     # 따라서 ORM 타입 데이터가 들어갈 것이라고 명시해주어야 정상적으로 변환시켜줄 수 있다.
     class Config:
@@ -29,14 +39,6 @@ class UserCreate(BaseModel):
     password: str
 
 
-# 아이디를 만든 후 사용자에게 password와 같은 값을 보여주지 않기 위한 respose_model
-class UserOut(BaseModel):
-    id: int
-    email: EmailStr
-    created_at: datetime
-
-    class Config:
-        orm_mode = True
 
 class UserLogin(BaseModel):
     email: EmailStr

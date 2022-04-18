@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
+from sqlalchemy.orm import relationship
 from .database import Base
 
 
@@ -14,6 +15,11 @@ class Post(Base):
     published = Column(Boolean, server_default='TRUE', nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False) # 참조할 테이블 클래스 이름이 아니라 __tablename__을 사용해야 한다는 것에 주의
+
+    # 실제 db에 owner가 추가되는 것은 아니다.
+    # 단순히 정의된 db 클래스를 알아서 fetch 해준다.
+    # 그러므로 위의 다른 요소들과 다르게 인자로 tablename이 아니라 Class 이름이 온다.
+    owner = relationship("User")
  
 class User(Base):
     __tablename__ = "users"
