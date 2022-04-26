@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from .schemas import TokenData
 from . import database, models
 from sqlalchemy.orm import Session
+from .config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login") # tokenUrl: 엔드포인트 주소
 
@@ -12,9 +13,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login") # tokenUrl: 엔드포인�
 #Algorithm
 #Expriation time (없다면 사용자가 계속 로그인 한 상태로만 존재하게 된다.)
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 
 
@@ -24,7 +25,7 @@ def create_access_token(data: dict):
     to_encode = data.copy()
 
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES) # ?? utcnow? vs now
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire})  # 현재시간에서 timedelta후에 만료
 
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 

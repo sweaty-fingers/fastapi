@@ -40,6 +40,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), curren
     db.add(new_post)
     db.commit() 
     db.refresh(new_post) # default 값 등을 넣어주기 위해 db에서 데이터를 가져와 인스턴스에 다시 넣어주는 작업
+    # db를 최신 상태로 유지해주는 작업
     return new_post
 # title str, content str, category, Bool publish
 
