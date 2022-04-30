@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
+from sqlalchemy import func # postgreSQL의 count와 같은 function을 사용할 수 있도록 해준다.
 from typing import List, Optional
 
 from app import models, schemas
@@ -12,7 +13,7 @@ router = APIRouter(
 
 )
 
-@router.get("/", response_model=List[schemas.Post]) # 스키마의 리스트가 반환되어야 하므로 리스트 형이 아니라면 에러가 발생한다.
+@router.get("/", response_model=List[schemas.PostOut]) # 스키마의 리스트가 반환되어야 하므로 리스트 형이 아니라면 에러가 발생한다.
 def get_posts(db: Session = Depends(get_db), current_user: int = Depends(get_current_user),
 limit: int = 10, skip: int = 0, search: Optional[str] = ""):
     # current_user의 타입은 int가 아니지만 앱 실행에 문제가 없다. 이를 Dict로 바꿔주어도 된다.
@@ -20,7 +21,15 @@ limit: int = 10, skip: int = 0, search: Optional[str] = ""):
     # posts = cursor.fetchall()
     print(search)
     # posts = db.query(models.Post).all()
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    # posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    
+    posts = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    # sqlalchemy에서는 기본적으로 left inner join으로 설정되어 있다.
+    # postgreSQL은 outer join 기본값이므로 isouter=True로 설정해준다.
+    # func 는 postgreSQL의 count와 같은 내장함수를 사용할 수 있게 해준다.
+    # .label(name) 은 SQL의 AS와 같은 역할을 한다.
+    # print(results)
     # 로그인 한 유저의 포스트만 보게 하는 법
     # posts = db.query(models.Post).filter(
     #     models.Post.owner_id == current_user.id).all()
@@ -50,14 +59,16 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), curren
 #     return {"detail": post}
 
 
-@router.get("/{id}", response_model=schemas.Post)
+@router.get("/{id}", response_model=schemas.PostOut)
 def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     # cursor.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),))
     # post = cursor.fetchone()
 
-    post = db.query(models.Post).filter(models.Post.id == id).first() 
+    # post = db.query(models.Post).filter(models.Post.id == id).first() 
     # all()을 사용할 경우 특정 조건을 만족하는 모든 데이터를 찾으려 함. 
     # but id와 같은 pb를 사용할 경우 오직 하나의 데이터만 존재한다는 것을 알고 있음 => first()를 이용해서 처음에 찾아지는 하나만 이용
+    post = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).first()
 
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
