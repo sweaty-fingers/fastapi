@@ -30,4 +30,4 @@ app.include_router(vote.router)
 
 @app.get("/") # http 매서드, path를 전해줌
 def root():
-    return {"message": "welcome to my root !!!!!!!!!!!!!!!"}
+    return {"message": "Hello wwwwooorrlld"}
