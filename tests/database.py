@@ -37,8 +37,9 @@ client = TestClient(app)
 #     # run our code after our test finishes
 #     # Base.metadata.drop_all(bind=engine)
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def session():
+    print("my session fixture ran")
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
@@ -47,7 +48,7 @@ def session():
     finally:
         db.close()
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def client(session):
     def override_get_db():
         try:
