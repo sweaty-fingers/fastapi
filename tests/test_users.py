@@ -1,7 +1,7 @@
 import pytest
 from app import schemas
 from jose import jwt
-from .database import client, session #client가 session을 실행하므로 필요
+# from .database import client, session #client가 session을 실행하므로 필요 # conftest가 자동으로 실행되기 때문에 import가 필요없다.
 from app.config import settings
 
 @pytest.fixture
@@ -41,3 +41,16 @@ def test_login_user(client, test_user):
     assert id == test_user["id"]
     assert login_res.token_type == "bearer"
     assert res.status_code == 200
+
+@pytest.mark.parametrize("email, password, status_code", [
+    ('wrongemail@gmail.com', 'correct_password', 403),
+    ('correctemail@gmail.com', 'right_password', 403),
+    ('wrongemail@gmail.com', 'wrong_password', 403),
+    (None, 'password123', 422),
+    ('email@gmail.com', None, 422)
+])
+def test_incorrect_login(test_user, client, email, password, status_code):
+    res = client.post("/login", data={"username": email, "password": password})
+
+    assert res.status_code == status_code
+    # assert res.json().get('detail') == 'Invalid Credentials'

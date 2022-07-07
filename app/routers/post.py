@@ -68,7 +68,7 @@ def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends
     # all()을 사용할 경우 특정 조건을 만족하는 모든 데이터를 찾으려 함. 
     # but id와 같은 pb를 사용할 경우 오직 하나의 데이터만 존재한다는 것을 알고 있음 => first()를 이용해서 처음에 찾아지는 하나만 이용
     post = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
-        models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).first()
+        models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.id == id).first()
 
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
