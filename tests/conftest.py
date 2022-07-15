@@ -16,7 +16,6 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-
 # Dependency
 def override_get_db():
     db = TestingSessionLocal()
@@ -83,6 +82,7 @@ def token(test_user):
 def authorized_client(client, token):
     """
     인증된 사용자가 필요한 test의 경우 기존 client 대신 사용
+    client, token이 먼저 실행 -> athorized 실행
     """
     client.headers = {
         **client.headers,
