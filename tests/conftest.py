@@ -75,6 +75,23 @@ def test_user(client):
 
 
 @pytest.fixture
+def test_user2(client):
+    """
+    다른 유저의 데이터를 삭제하는 작업을 테스트 하기 위한 setup
+    """
+    user_data = {"email": "hello456@gmail.com", "password": "password123"}
+    res = client.post("/users/", json=user_data)
+
+    assert res.status_code == 201
+    new_user = res.json()
+    new_user['password'] = user_data['password']
+    # response model이 schemas.UserOut이므로 password가 출력되지 않는다.
+    # 따라서 password를 추가해준다.
+    return new_user
+
+
+
+@pytest.fixture
 def token(test_user):
     return create_access_token({"user_id": test_user['id']})
 
@@ -93,7 +110,7 @@ def authorized_client(client, token):
 
 
 @pytest.fixture
-def test_posts(test_user, session):
+def test_posts(test_user, session, test_user2):
     posts_data = [{
         "title": "first title",
         "content": "first content",
@@ -108,10 +125,11 @@ def test_posts(test_user, session):
         "content": "3rd content",
         "owner_id": test_user['id']
     }, {
-        "title": "3rd title",
-        "content": "3rd content",
-        "owner_id": test_user['id']
+        "title": "4th title",
+        "content": "4th content",
+        "owner_id": test_user2['id']
     }]
+
 
     def create_post_model(post):
         return models.Post(**post)
