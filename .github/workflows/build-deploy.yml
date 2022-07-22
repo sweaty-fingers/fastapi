@@ -1,0 +1,24 @@
+name: Build and Deploy code
+
+on: ["push", "pull_request"]
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: pulling git repo
+        uses: actions/checkout@v3
+      - name: say hi to me
+        run: echo "Hi hyoon"
+
+  
+
+
+# on:
+#   push:
+#     brancehs: #["master"] # ["another", "feature"...] 여러 브랜치 추가 가능
+#       - "main"
+#     # - "anotherbranch"
+#   pull_request:
+#     branches:
+#       - "test_branch"
