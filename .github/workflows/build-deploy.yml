@@ -4,7 +4,6 @@ on: [push, pull_request]
 
 jobs:
   job1:
-    build:
     environment:
       name: testing
     env:
