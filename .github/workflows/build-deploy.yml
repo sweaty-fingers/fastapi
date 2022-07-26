@@ -1,6 +1,6 @@
 name: Build and Deploy code
 
-on: ["push", "pull_request"]
+on: [push, pull_request]
 
 jobs:
   job1:
@@ -15,7 +15,6 @@ jobs:
       SECRET_KEY: ${{secrets.SECRET_KEY}}
       ALGORITHM: ${{secrets.ALGORITHM}}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${{secrets.ACCESS_TOKEN_EXPIRE_MINUTES}}
-    
     services:
       postgres:
         image: postgres
