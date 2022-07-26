@@ -7,7 +7,7 @@ import time
 from .config import settings
 # SQLALCHEMY_DATABASE_URL = 'postgresql://<username>:<password>@<ip-address/hostname>/<database_name>'
 # URL을 hard coding 하는 것은 좋지 않음 (추후 수정)
-SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}/{settings.database_name}"
+SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
 #'postgresql://postgres:postgres041$@localhost/fastapi' # 'postgresql://{username}:{password}@localhost/{databasename}' 
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
