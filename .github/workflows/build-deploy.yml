@@ -72,8 +72,6 @@ jobs:
       #     cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/fastapi_ci:buildcache
       #     cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/fastapi_ci:buildcache,mode=max
 
-      - name: push changes to production 
-
   # 기본적으로 github action의 job은 병렬적으로 실행된다.
   # 이를 직렬적으로 실핼하기 위해 needs를 추가한다.
   deploy:
@@ -82,7 +80,8 @@ jobs:
 
     steps:
       - name: deploying stuff
-        run: echo "going to deploy some stuff"      
+        run: echo "going to deploy some stuff"  
+      
   
 
 
