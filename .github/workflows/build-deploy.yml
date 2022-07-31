@@ -99,7 +99,7 @@ jobs:
           password: ${{secrets.PROD_PASSWORD}}
           script: | # 사용할 명령어
             cd app/src
-            git pull 
+            git pull
             echo ${{secrets.PROD_PASSWORD}} | sudo -S systemctl restart api 
 
 # echo password | sudo -S systemctl restart api
