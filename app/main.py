@@ -29,5 +29,6 @@ app.include_router(user.router)
 app.include_router(auth.router)
 app.include_router(vote.router)
 
-@app.get("/") # http 매서드, path를 전해줌def root():
+@app.get("/") # http 매서드, path를 전해줌
+def root():
     return {"message": "Hello wwwwooorrlld change aaabbbb"}
