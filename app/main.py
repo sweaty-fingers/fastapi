@@ -31,4 +31,4 @@ app.include_router(vote.router)
 
 @app.get("/") # http 매서드, path를 전해줌
 def root():
-    return {"message": "Hello wwwwooorrlld change aaabbbb"}
+    return {"message": "Hello successfully deployed from CI/CD pipeline"}
