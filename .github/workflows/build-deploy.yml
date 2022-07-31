@@ -76,15 +76,15 @@ jobs:
   # 이를 직렬적으로 실핼하기 위해 needs를 추가한다.
   deploy:
     needs: [build]
-    runs-on: ubuntu-latest
     environment:
       name: production
+    runs-on: ubuntu-latest
     steps:
       - name: pulling git repo
         uses: actions/checkout@v3
 
       - name: deploying to Heroku
-      - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+        uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: ${{secrets.HEROKU_APP_NAME} #Must be unique in Heroku
