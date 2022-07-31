@@ -120,8 +120,8 @@ def test_update_other_user_post(authorized_client, test_user, test_user2, test_p
 def test_unauthorized_user_update_post(client, test_user, test_posts):
     res = client.put(f"/posts/{test_posts[0].id}")
     
-    # assert res.status_code == 401
-    assert res.status_code == 403 # changes for check github action
+    assert res.status_code == 401
+    # assert res.status_code == 403 # changes for check github action
 
 
 def test_authorized_user_update_post_non_exist(authorized_client, test_user, test_posts):
