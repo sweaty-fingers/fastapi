@@ -2,9 +2,7 @@ version: "3"
 services:
   api:
     image: hgyoon0928/fastapi
-    depends_on:
-      - postgres
-    ports: 
+    ports:
       - 8000:8000
 
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
@@ -20,6 +18,8 @@ services:
       - ALGORITHM=${ALGORITHM}
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
 
+    depends_on:
+      - postgres
   postgres:
     image: postgres
     environment:
